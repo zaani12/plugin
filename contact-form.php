@@ -8,7 +8,11 @@ Author: zaani hmaza
 Author URI: https://example.com/
 License: GPL2
 */
+
+// $date_envoi = date('l jS \of F Y h:i:s A');
+
 add_action( 'admin_menu', 'wporg_options_page' );
+
 function wporg_options_page() {
     add_menu_page(
         'contact-form',
@@ -20,6 +24,7 @@ function wporg_options_page() {
         20
     );
 }
+
 register_activation_hook( __FILE__, 'cf_create_table' );
 
 function cf_create_table() {
@@ -28,10 +33,10 @@ function cf_create_table() {
     $charset_collate = $wpdb->get_charset_collate();
 
     $sql = "CREATE TABLE $table_name (
-        id INT(11) AUTO_INCREMENT PRIMARY KEY,
-        sujet VARCHAR(255) NOT NULL,
-        nom VARCHAR(255) NOT NULL,
-        prenom VARCHAR(255) NOT NULL,
+        -- id INT(11) AUTO_INCREMENT PRIMARY KEY,
+        subject VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        first_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
         message TEXT NOT NULL,
         date_envoi DATETIME NOT NULL
@@ -40,6 +45,7 @@ function cf_create_table() {
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
     dbDelta( $sql );
 }
+
 register_deactivation_hook( __FILE__, 'cf_delete_table' );
 
 function cf_delete_table() {
@@ -48,18 +54,13 @@ function cf_delete_table() {
     $sql = "DROP TABLE IF EXISTS $table_name;";
     $wpdb->query( $sql );
 }
-// Enregistrement du shortcode pour afficher le formulaire de contact
-add_shortcode('contact_form', 'contact_form_shortcode');
 
-// Fonction callback pour le shortcode
-function contact_form_shortcode($atts) {
-    // Générer le HTML du formulaire de contact
-    ob_start();
-    include(plugin_dir_path(__FILE__) . 'contact-form.php'); // Remplacez le chemin avec le chemin vers votre fichier de formulaire de contact
-    return ob_get_clean();
-}
+// Enregistrement du shortcode pour afficher le formulaire de contact
+add_shortcode('my_contact_form', 'my_contact_form');
+
 // Fonction de traitement du formulaire de contact
-function process_contact_form() {
+// Fonction de traitement du formulaire de contact
+function my_contact_form() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'contact_form';
 
@@ -90,7 +91,7 @@ function process_contact_form() {
     }
 }
 
-add_shortcode( 'my_contact_form', 'my_contact_form' );
+add_shortcode( 'my_contact_form', 'my_contact_form_shortcode' );
 
 function my_contact_form_shortcode() {
     // Afficher le formulaire de contact avec le shortcode
