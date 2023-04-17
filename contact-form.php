@@ -33,7 +33,7 @@ function cf_create_table() {
     $charset_collate = $wpdb->get_charset_collate();
 
     $sql = "CREATE TABLE $table_name (
-        -- id INT(11) AUTO_INCREMENT PRIMARY KEY,
+        id INT(11) AUTO_INCREMENT PRIMARY KEY,
         subject VARCHAR(255) NOT NULL,
         name VARCHAR(255) NOT NULL,
         first_name VARCHAR(255) NOT NULL,
@@ -59,26 +59,9 @@ function cf_delete_table() {
 add_shortcode('my_contact_form', 'my_contact_form');
 
 // Fonction de traitement du formulaire de contact
-// Fonction de traitement du formulaire de contact
 function my_contact_form() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'contact_form';
-
-    // Récupérer les données soumises par le formulaire
-    $subject = sanitize_text_field( $_POST['subject'] );
-    $name = sanitize_text_field( $_POST['name'] );
-    $first_name = sanitize_text_field( $_POST['first_name'] );
-    $email = sanitize_email( $_POST['email'] );
-    $message = sanitize_textarea_field( $_POST['message'] );
-
-    // Insérer les données dans la table "wp_contact_form"
-    $data = array(
-        'subject' => $subject,
-        'name' => $name,
-        'first_name' => $first_name,
-        'email' => $email,
-        'message' => $message
-    );
 
     $result = $wpdb->insert( $table_name, $data );
 
@@ -97,19 +80,76 @@ function my_contact_form_shortcode() {
     // Afficher le formulaire de contact avec le shortcode
     ob_start();
     ?>
-    <form id="contact-form" method="post" action="">
-        <p><label for="subject">Sujet :</label><br />
-            <input type="text" name="subject" id="subject" required></p>
-        <p><label for="name">Nom :</label><br />
-            <input type="text" name="name" id="name" required></p>
-        <p><label for="first_name">Prénom :</label><br />
-            <input type="text" name="first_name" id="first_name" required></p>
-        <p><label for="email">Email :</label><br />
-            <input type="email" name="email" id="email" required></p>
-        <p><label for="message">Message :</label><br />
-            <textarea name="message" id="message" required></textarea></p>
-        <p><input type="submit" name="submit" value="Envoyer"></p>
-    </form>
+<form id="contact-form" method="post" action="">
+    <p><label for="subject">Sujet :</label><br />
+        <input type="text" name="subject" id="subject" required></p>
+    <p><label for="name">Nom :</label><br />
+        <input type="text" name="name" id="name" required></p>
+    <p><label for="first_name">Prénom :</label><br />
+        <input type="text" name="first_name" id="first_name" required></p>
+    <p><label for="email">Email :</label><br />
+        <input type="email" name="email" id="email" required></p>
+    <p><label for="message">Message :</label><br />
+        <textarea name="message" id="message" required></textarea></p>
+    <p><input type="submit" name="submit" value="Envoyer"></p>
+</form>
+    <style>
+    /* Style for form input fields and textarea */
+    input[type="text"],
+    input[type="email"],
+    textarea {
+        width: 100%; /* Make input fields and textarea take up full width of form container */
+        padding: 10px; /* Add padding for spacing */
+        margin-bottom: 10px; /* Add margin bottom for spacing between fields */
+        border: 1px solid #ccc; /* Add border for visual separation */
+    }
+
+    /* Style for form submit button */
+    input[type="submit"] {
+        background-color: #4caf50; /* Set your desired button background color */
+        color: #fff; /* Set button text color */
+        padding: 10px 20px; /* Add padding for spacing */
+        border: none; /* Remove default button border */
+        cursor: pointer; /* Add cursor pointer for hover effect */
+    }
+
+    /* Style for form submit button on hover */
+    input[type="submit"]:hover {
+        background-color: #45a048; /* Set your desired button background color on hover */
+    }
+</style>
     <?php
     return ob_get_clean();
+}
+// Function to process form data
+function process_contact_form() {
+    if ( isset( $_POST['submit'] ) && $_POST['submit'] === '1' ) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'contact_form';
+
+        // Sanitize form data
+        $subject = sanitize_text_field( $_POST['subject'] );
+        $first_name = sanitize_text_field( $_POST['first_name'] );
+        $last_name = sanitize_text_field( $_POST['last_name'] );
+        $email = sanitize_email( $_POST['email'] );
+        $message = sanitize_textarea_field( $_POST['message'] );
+        $$date_envoi = date('l jS \of F Y h:i:s A');
+
+        // Insert form data into database
+        $wpdb->insert(
+            $table_name,
+            array(
+                'subject' => $subject,
+                'name' => $last_name,
+                'first_name' => $first_name,
+                'email' => $email,
+                'message' => $message,
+                'date_envoi' => $date_envoi,
+            ),
+        );
+
+        // Redirect to the same page to avoid form resubmission
+        // wp_redirect( get_permalink() );
+        exit;
+    }
 }
